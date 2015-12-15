@@ -1,2 +1,2 @@
-# mika-backend
-Multiuser back end to the optional frontend mika-www
+# rupert
+Multiuser back end to the optional frontend rupert-web
