@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	rupert.NewEngine().Run(":8081")
+	rupert.Main()
 }

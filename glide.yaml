@@ -6,3 +6,9 @@ import:
   - package: github.com/lib/pq
     repo:    https://github.com/lib/pq
     vcs:     git
+  - package: gopkg.in/gorp.v1
+    repo:    https://gopkg.in/gorp.v1
+    vcs:     git
+  - package: github.com/Sirupsen/logrus
+    repo:    https://github.com/Sirupsen/logrus
+    vcs:     git
