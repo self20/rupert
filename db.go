@@ -1,14 +1,18 @@
 package rupert
 
 import (
-	"database/sql"
-
 	"crypto/sha256"
-	_ "github.com/lib/pq"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/lib/pq"
 	"gopkg.in/gorp.v1"
 	"io"
 	"math/rand"
 	"time"
+)
+
+var (
+	db *gorp.DbMap
 )
 
 type User struct {
@@ -16,7 +20,7 @@ type User struct {
 	Name    string `db:"name"`
 	Created int64  `db:"created_at"`
 	Salt    string `db:"salt"`
-	Hash    string `db:"key"`
+	Hash    []byte `db:"key"`
 }
 
 func randString(l int) string {
@@ -52,7 +56,8 @@ func computeHash(password, salt string) []byte {
 func initDb() *gorp.DbMap {
 	db, err := sql.Open("sqlite3", "/tmp/rupert_db.sqlite")
 	checkErr(err, "sql.Open Failed to open database")
-	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.SqliteDialect{}}
-
-	return dbmap
+	return &gorp.DbMap{
+		Db:      db,
+		Dialect: gorp.SqliteDialect{},
+	}
 }

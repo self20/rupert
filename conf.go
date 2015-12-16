@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
-	"os"
 	"sync"
 )
 
 var (
 	// Global config instance & lock
-	Config     *Configuration
+	config     *Configuration
 	configLock = new(sync.RWMutex)
 )
 
@@ -52,11 +51,14 @@ type Configuration struct {
 
 // LoadConfig reads in a json based config file from the path provided and updated
 // the currently active application configuration
-func initConfig(config_file string, exitfail bool) *Configuration {
+func readConfig(config_file string) (*Configuration, error) {
+
+	cfg := new(Configuration)
+
 	log.WithFields(log.Fields{
 		"config_file": config_file,
 	}).Info("Loading config")
-
+	log.Println(config_file)
 	file, err := ioutil.ReadFile(config_file)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -64,21 +66,22 @@ func initConfig(config_file string, exitfail bool) *Configuration {
 			"err":         err.Error(),
 			"config_file": config_file,
 		}).Fatal("Failed to open config file")
-		if fail {
-			os.Exit(1)
-		}
+		return nil, err
 	}
 
-	cfg := new(Configuration)
 	if err = json.Unmarshal(file, cfg); err != nil {
 		log.WithFields(log.Fields{
 			"fn":          "LoadConfig",
 			"err":         err.Error(),
 			"config_file": config_file,
 		}).Error("Failed to parse config file, cannot continue")
-		if fail {
-			os.Exit(1)
-		}
+		return cfg, err
 	}
-	return cfg
+	return cfg, nil
+}
+
+func setConfig(cfg *Configuration) {
+	configLock.Lock()
+	config = cfg
+	configLock.Unlock()
 }
