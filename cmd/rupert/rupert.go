@@ -1,3 +1,4 @@
+// This file is just used to create a executable
 package main
 
 import (
@@ -5,5 +6,5 @@ import (
 )
 
 func main() {
-	rupert.Main()
+	rupert.Start()
 }

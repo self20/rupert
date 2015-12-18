@@ -1,7 +1,7 @@
 package rupert
 
 import (
-	"log"
+	log "github.com/Sirupsen/logrus"
 )
 
 func checkErr(err error, msg string) {
