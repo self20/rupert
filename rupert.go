@@ -24,20 +24,24 @@ var (
 )
 
 func Start() {
-	db := initDb()
-	defer db.Db.Close()
-
 	mika.SetupLogger("info", true)
-	cfg, err := readConfig(*config_file)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	setConfig(cfg)
-	ListenAndServe(NewEngine())
+	db := initDb()
+	defer db.Close()
+	checkErr(db.Ping(), "Failed to connect to database as configured adress")
+	forum.Initialize()
+	http_engine := NewEngine()
+	ListenAndServe(http_engine)
 }
 
 func init() {
 	startTime = int32(time.Now().Unix())
 	rand.Seed(time.Now().UnixNano())
 	flag.Parse()
+
+	// Load the config first
+	cfg, err := readConfig(*config_file)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	setConfig(cfg)
 }

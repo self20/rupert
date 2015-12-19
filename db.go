@@ -3,16 +3,15 @@ package rupert
 import (
 	"crypto/sha256"
 	"database/sql"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	//_ "github.com/lib/pq"
-	"gopkg.in/gorp.v1"
 	"io"
 	"math/rand"
 	"time"
 )
 
 var (
-	db *gorp.DbMap
+	db *sql.DB
 )
 
 type User struct {
@@ -53,11 +52,8 @@ func computeHash(password, salt string) []byte {
 	return hash
 }
 
-func initDb() *gorp.DbMap {
+func initDb() *sql.DB {
 	db, err := sql.Open("sqlite3", "/tmp/rupert_db.sqlite")
 	checkErr(err, "sql.Open Failed to open database")
-	return &gorp.DbMap{
-		Db:      db,
-		Dialect: gorp.SqliteDialect{},
-	}
+	return db
 }
