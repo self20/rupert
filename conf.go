@@ -47,6 +47,8 @@ type Configuration struct {
 
 	// Use colours log output
 	ColourLogs bool
+
+	DatabaseDSN string
 }
 
 // LoadConfig reads in a json based config file from the path provided and updated

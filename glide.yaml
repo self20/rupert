@@ -13,3 +13,4 @@ import:
   repo: https://github.com/Sirupsen/logrus
   vcs: git
 - package: github.com/mattn/go-sqlite3
+- package: github.com/jmoiron/sqlx

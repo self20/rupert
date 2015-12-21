@@ -25,7 +25,7 @@ var (
 
 func Start() {
 	mika.SetupLogger("info", true)
-	db := initDb()
+	db := initDb(config.DatabaseDSN)
 	defer db.Close()
 	checkErr(db.Ping(), "Failed to connect to database as configured adress")
 	forum.Initialize()

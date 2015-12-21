@@ -2,25 +2,16 @@ package rupert
 
 import (
 	"crypto/sha256"
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"io"
 	"math/rand"
-	"time"
 )
 
 var (
-	db *sql.DB
+	db *sqlx.DB
 )
-
-type User struct {
-	UserID  int64  `db:"user_id"`
-	Name    string `db:"name"`
-	Created int64  `db:"created_at"`
-	Salt    string `db:"salt"`
-	Hash    []byte `db:"key"`
-}
 
 func randString(l int) string {
 	bytes := make([]byte, l)
@@ -34,16 +25,6 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func newUser(name, password string) User {
-	salt := randString(20)
-	return User{
-		Created: time.Now().UnixNano(),
-		Name:    name,
-		Salt:    salt,
-		Hash:    computeHash(password, salt),
-	}
-}
-
 func computeHash(password, salt string) []byte {
 	h := sha256.New()
 	io.WriteString(h, password)
@@ -52,8 +33,8 @@ func computeHash(password, salt string) []byte {
 	return hash
 }
 
-func initDb() *sql.DB {
-	db, err := sql.Open("sqlite3", "/tmp/rupert_db.sqlite")
+func initDb(db_dsn string) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", db_dsn)
 	checkErr(err, "sql.Open Failed to open database")
 	return db
 }

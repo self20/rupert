@@ -1,4 +1,5 @@
 {
+  "Testing": false,
   "Debug": false,
   "ListenHost": ":34000",
   "RedisHost": "localhost:6379",
@@ -14,4 +15,5 @@
   "SQLPass": "",
   "LogLevel": "info",
   "ColourLogs": true,
+  "DatabaseDSN": "dbname=rupert sslmode=disable"
 }
