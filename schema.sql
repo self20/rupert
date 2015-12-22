@@ -41,7 +41,7 @@ CREATE TABLE users
 (
     user_id INTEGER PRIMARY KEY NOT NULL,
     username VARCHAR NOT NULL,
-    hash VARCHAR NOT NULL,
+    hash BYTEA NOT NULL,
     salt VARCHAR NOT NULL,
     enabled BOOLEAN DEFAULT true,
     created_on TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -53,6 +53,6 @@ CREATE UNIQUE INDEX forum_last_thread_id_uindex ON forum (last_thread_id);
 CREATE UNIQUE INDEX forum_category_name_uindex ON forum_category (name);
 ALTER TABLE forum_comment ADD FOREIGN KEY (author_id) REFERENCES users (user_id);
 ALTER TABLE forum_thread ADD FOREIGN KEY (forum_id) REFERENCES forum (forum_id);
-ALTER TABLE forum_thread ADD FOREIGN KEY (author_id) REFERENCES ;
+ALTER TABLE forum_thread ADD FOREIGN KEY (last_comment_id) REFERENCES forum_comment (comment_id);
 CREATE UNIQUE INDEX forum_thread_title_uindex ON forum_thread (title);
 CREATE UNIQUE INDEX user_username_uindex ON users (username);

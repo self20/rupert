@@ -42,9 +42,9 @@ CREATE TABLE forum_thread
 );
 CREATE TABLE users
 (
-    user_id INTEGER PRIMARY KEY NOT NULL,
+    user_id SERIAL PRIMARY KEY,
     username VARCHAR NOT NULL,
-    hash VARCHAR NOT NULL,
+    hash BYTEA NOT NULL,
     salt VARCHAR NOT NULL,
     enabled BOOLEAN DEFAULT true,
     created_on TIMESTAMP WITH TIME ZONE DEFAULT now(),

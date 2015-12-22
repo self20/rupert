@@ -1,19 +1,18 @@
 package rupert
 
 import (
-	"log"
 	"time"
 )
 
 type (
 	User struct {
-		UserID    int
-		Username  string
-		Hash      []byte
-		Salt      string
-		Enabled   bool
-		CreatedOn time.Time
-		UpdatedOn time.Time
+		UserID    int       `db:"user_id"`
+		Username  string    `db:"username"`
+		Hash      []byte    `db:"hash"`
+		Salt      string    `db:"salt"`
+		Enabled   bool      `db:"enabled"`
+		CreatedOn time.Time `db:"created_on"`
+		UpdatedOn time.Time `db:"updated_on"`
 	}
 )
 
@@ -33,9 +32,21 @@ var (
 		FROM users
 		WHERE username=$1
 	`
+	queryUserUpdate = `
+		UPDATE
+			users
+		SET
+			username = :username,
+			hash = :hash,
+			salt = :salt,
+			enabled = :enabled,
+			updated_on = :updated_on
+		WHERE
+			user_id = :user_id
+	`
 )
 
-func NewUser(name, password string) User {
+func UserNew(name, password string) User {
 	salt := randString(20)
 	return User{
 		CreatedOn: time.Now(),
@@ -43,10 +54,17 @@ func NewUser(name, password string) User {
 		Username:  name,
 		Salt:      salt,
 		Hash:      computeHash(password, salt),
+		Enabled:   false,
 	}
 }
 
-func GetUserByID(user_id int) (*User, error) {
+func UserSave(user *User) error {
+	user.UpdatedOn = time.Now()
+	_, err := db.NamedExec(queryUserUpdate, user)
+	return err
+}
+
+func UserGetByID(user_id int) (*User, error) {
 	user := User{}
 	err := db.Get(&user, queryUserByID, user_id)
 	if err != nil {
@@ -55,7 +73,7 @@ func GetUserByID(user_id int) (*User, error) {
 	return &user, nil
 }
 
-func GetUserByName(user_name string) (*User, error) {
+func UserGetByName(user_name string) (*User, error) {
 	user := User{}
 	err := db.Get(&user, queryUserByName, user_name)
 	if err != nil {
@@ -64,13 +82,15 @@ func GetUserByName(user_name string) (*User, error) {
 	return &user, nil
 }
 
-func CreateUser(username string, password string, enabled bool) (*User, error) {
-	log.Println("1")
-	user := NewUser(username, password)
+func UserDelete(user_id int) error {
+	_, err := db.Exec("DELETE FROM users WHERE user_id = $1", user_id)
+	return err
+}
+
+func UserCreate(username string, password string, enabled bool) (*User, error) {
+	user := UserNew(username, password)
 	user.Enabled = enabled
-	log.Println("2")
 	tx := db.MustBegin()
-	log.Println("3")
 	_, err := tx.NamedExec(queryCreateUser, &user)
 	if err != nil {
 		return nil, err
@@ -79,5 +99,5 @@ func CreateUser(username string, password string, enabled bool) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return GetUserByName(username)
+	return UserGetByName(username)
 }
