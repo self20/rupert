@@ -1,3 +1,6 @@
+machine:
+  environment:
+    RUPERT_TEST_DB: circle_test
 dependencies:
   pre:
     - cp .ci/config.ci.json config.json
