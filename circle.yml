@@ -1,0 +1,3 @@
+dependencies:
+  pre:
+    - cp .ci/config.ci.json config.json
