@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	db *sqlx.DB
+	DB *sqlx.DB
 )
 
 func randString(l int) string {

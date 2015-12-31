@@ -2,6 +2,7 @@ package rupert
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"os"
 	"testing"
 	"time"
@@ -18,8 +19,9 @@ func checkTestNil(t *testing.T, i interface{}) {
 }
 
 func TestUsers(t *testing.T) {
+	db := NewTestDB()
 	// Create user
-	user, err := UserCreate(test_user_name, "test", true)
+	user, err := UserCreate(db, test_user_name, "test", true)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -32,7 +34,7 @@ func TestUsers(t *testing.T) {
 	}
 
 	// Fetch by name
-	user_name, err := UserGetByName(test_user_name)
+	user_name, err := UserGetByName(db, test_user_name)
 	if err != nil {
 		t.Error("Failed to retrieve newly created user")
 	}
@@ -41,7 +43,7 @@ func TestUsers(t *testing.T) {
 	}
 
 	// Fetch by name
-	user_id, err := UserGetByID(user_name.UserID)
+	user_id, err := UserGetByID(db, user_name.UserID)
 	if err != nil {
 		t.Error("Failed to retrieve newly created user", err.Error())
 	}
@@ -52,13 +54,13 @@ func TestUsers(t *testing.T) {
 	// Save user changes
 	time.Sleep(1 * time.Second) // make sure the time stamp differs
 	user_id.Username = test_user_name + test_user_name
-	err = UserSave(user_id)
+	err = UserSave(db, user_id)
 	if err != nil {
 		t.Error("Failed to update user", err)
 	}
 
 	// Fetch by name
-	user_id2, err := UserGetByID(user_name.UserID)
+	user_id2, err := UserGetByID(db, user_name.UserID)
 	if err != nil {
 		t.Error("Failed to retrieve newly created user", err.Error())
 	}
@@ -71,28 +73,27 @@ func TestUsers(t *testing.T) {
 	}
 
 	// Delete user
-	err = UserDelete(user_id.UserID)
+	err = UserDelete(db, user_id.UserID)
 	if err != nil {
 		t.Error("Could not delete user", err.Error())
 	}
-	_, err = UserGetByID(user_name.UserID)
+	_, err = UserGetByID(db, user_name.UserID)
 	if err == nil {
 		t.Error("Could not fully delete user", err.Error())
 	}
 }
 
-func init() {
-	if config.Testing {
-		// Allow a alternate DB to be specified for testing
-		db_name := os.Getenv("RUPERT_TEST_DB")
-		if db_name == "" {
-			db_name = "rupert_test"
-		}
-		db = initDb(fmt.Sprintf("dbname=%s sslmode=disable", db_name))
-
-		// Re-initialize a empty DB
-		db.MustExec("drop schema public cascade;")
-		db.MustExec("create schema public;")
-		db.MustExec(Schema)
+func NewTestDB() *sqlx.DB {
+	// Allow a alternate DB to be specified for testing
+	db_name := os.Getenv("RUPERT_TEST_DB")
+	if db_name == "" {
+		db_name = "rupert_test"
 	}
+	db := initDb(fmt.Sprintf("dbname=%s sslmode=disable", db_name))
+
+	// Re-initialize a empty DB
+	db.MustExec("drop schema public cascade;")
+	db.MustExec("create schema public;")
+	db.MustExec(Schema)
+	return db
 }

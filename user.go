@@ -1,6 +1,7 @@
 package rupert
 
 import (
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -18,19 +19,27 @@ type (
 
 var (
 	queryCreateUser = `
-		INSERT INTO users (username, hash, salt, enabled)
-		VALUES (:username, :hash, :salt, :enabled)
+		INSERT INTO users
+			(username, hash, salt, enabled)
+		VALUES
+			(:username, :hash, :salt, :enabled)
 	`
 	queryUserByID = `
-		SELECT user_id, username, hash, salt, enabled, created_on, updated_on
-		FROM users
-		WHERE user_id=$1
+		SELECT
+			user_id, username, hash, salt, enabled, created_on, updated_on
+		FROM
+			users
+		WHERE
+			user_id=$1
 	`
 
 	queryUserByName = `
-		SELECT user_id, username, hash, salt, enabled, created_on, updated_on
-		FROM users
-		WHERE username=$1
+		SELECT
+			user_id, username, hash, salt, enabled, created_on, updated_on
+		FROM
+			users
+		WHERE
+			username=$1
 	`
 	queryUserUpdate = `
 		UPDATE
@@ -58,13 +67,13 @@ func UserNew(name, password string) User {
 	}
 }
 
-func UserSave(user *User) error {
+func UserSave(db *sqlx.DB, user *User) error {
 	user.UpdatedOn = time.Now()
 	_, err := db.NamedExec(queryUserUpdate, user)
 	return err
 }
 
-func UserGetByID(user_id int) (*User, error) {
+func UserGetByID(db *sqlx.DB, user_id int) (*User, error) {
 	user := User{}
 	err := db.Get(&user, queryUserByID, user_id)
 	if err != nil {
@@ -73,7 +82,7 @@ func UserGetByID(user_id int) (*User, error) {
 	return &user, nil
 }
 
-func UserGetByName(user_name string) (*User, error) {
+func UserGetByName(db *sqlx.DB, user_name string) (*User, error) {
 	user := User{}
 	err := db.Get(&user, queryUserByName, user_name)
 	if err != nil {
@@ -82,12 +91,12 @@ func UserGetByName(user_name string) (*User, error) {
 	return &user, nil
 }
 
-func UserDelete(user_id int) error {
+func UserDelete(db *sqlx.DB, user_id int) error {
 	_, err := db.Exec("DELETE FROM users WHERE user_id = $1", user_id)
 	return err
 }
 
-func UserCreate(username string, password string, enabled bool) (*User, error) {
+func UserCreate(db *sqlx.DB, username string, password string, enabled bool) (*User, error) {
 	user := UserNew(username, password)
 	user.Enabled = enabled
 	tx := db.MustBegin()
@@ -99,5 +108,5 @@ func UserCreate(username string, password string, enabled bool) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return UserGetByName(username)
+	return UserGetByName(db, username)
 }

@@ -59,7 +59,7 @@ func readConfig(config_file string) (*Configuration, error) {
 
 	log.WithFields(log.Fields{
 		"config_file": config_file,
-	}).Info("Loading config")
+	}).Debug("Loading config")
 	file, err := ioutil.ReadFile(config_file)
 	if err != nil {
 		log.WithFields(log.Fields{
