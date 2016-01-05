@@ -74,12 +74,9 @@ func UserSave(db *sqlx.DB, user *User) error {
 }
 
 func UserGetByID(db *sqlx.DB, user_id int) (*User, error) {
-	user := User{}
+	var user User
 	err := db.Get(&user, queryUserByID, user_id)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+	return &user, err
 }
 
 func UserGetByName(db *sqlx.DB, user_name string) (*User, error) {
